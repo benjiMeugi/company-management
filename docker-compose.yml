@@ -1,0 +1,87 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8082:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  # ---- auth user ----
+  auth-user-api:
+    build:
+      context: ./backends/auth-user-api
+    container_name: auth-user-api
+    restart: unless-stopped
+    volumes:
+      - ./backends/auth-user-api/src:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  # ---- employe ----
+  employe-api:
+    build:
+      context: ./backends/employe-api
+    container_name: employe-api
+    restart: unless-stopped
+    volumes:
+      - ./backends/employe-api/src:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - ./backends/auth-user-api/src:/var/www/auth-user-api
+      - ./backends/employe-api/src:/var/www/employe-api
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - auth-user-api
+      - employe-api
+    networks:
+      - app_network
+
+volumes:
+  mysql_data:
+
+networks:
+  app_network:
+    driver: bridge
