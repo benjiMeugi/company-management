@@ -34,28 +34,44 @@ services:
     networks:
       - app_network
 
-  # ---- auth user ----
-  auth-user-api:
-    build:
-      context: ./backends/auth-user-api
-    container_name: auth-user-api
-    restart: unless-stopped
-    volumes:
-      - ./backends/auth-user-api/src:/var/www/html
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - app_network
+  # ---- auth user (pas encore initialisé, à décommenter plus tard) ----
+
+  # auth-user-api:
+  #   build:
+  #     context: ./backends/auth-user-api
+  #   container_name: auth-user-api
+  #   restart: unless-stopped
+  #   environment:
+  #     DB_CONNECTION: mysql
+  #     DB_HOST: mysql
+  #     DB_PORT: 3306
+  #     DB_DATABASE: auth_db
+  #     DB_USERNAME: root
+  #     DB_PASSWORD: root
+  #   volumes:
+  #     - ./backends/auth-user-api/src:/var/www/auth-user-api
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #   networks:
+  #     - app_network
 
   # ---- employe ----
+
   employe-api:
     build:
       context: ./backends/employe-api
     container_name: employe-api
     restart: unless-stopped
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: employee_db
+      DB_USERNAME: root
+      DB_PASSWORD: root
     volumes:
-      - ./backends/employe-api/src:/var/www/html
+      - ./backends/employe-api/src:/var/www/employe-api
     depends_on:
       mysql:
         condition: service_healthy
@@ -70,12 +86,12 @@ services:
       - "8080:8080"
       - "8081:8081"
     volumes:
-      - ./backends/auth-user-api/src:/var/www/auth-user-api
       - ./backends/employe-api/src:/var/www/employe-api
+      # - ./backends/auth-user-api/src:/var/www/auth-user-api
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
-      - auth-user-api
       - employe-api
+      # - auth-user-api
     networks:
       - app_network
 
