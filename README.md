@@ -1,0 +1,1 @@
+docker compose exec employe-api sh
