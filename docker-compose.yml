@@ -71,8 +71,11 @@ services:
       DB_DATABASE: employee_db
       DB_USERNAME: root
       DB_PASSWORD: root
+    command: >-
+      sh -c "chmod -R a+rwX storage bootstrap/cache && php-fpm -F"
     volumes:
       - ./backends/employe-api:/var/www/employe-api
+      - employe_api_vendor:/var/www/employe-api/vendor
     depends_on:
       mysql:
         condition: service_healthy
@@ -99,6 +102,7 @@ services:
 
 volumes:
   mysql_data:
+  employe_api_vendor:
 
 networks:
   app_network:
