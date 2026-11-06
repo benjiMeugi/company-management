@@ -1,6 +1,0 @@
-[submodule "backends/employe-api"]
-	path = backends/employe-api
-	url = https://github.com/benjiMeugi/employe-api.git
-[submodule "backends/authentication-api"]
-	path = backends/authentication-api
-	url = https://github.com/benjiMeugi/auth-user-manager.git

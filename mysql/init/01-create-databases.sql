@@ -2,4 +2,5 @@
  
 CREATE DATABASE IF NOT EXISTS authentication_db;
 CREATE DATABASE IF NOT EXISTS employee_db;
+CREATE DATABASE IF NOT EXISTS webmail_db;
  
